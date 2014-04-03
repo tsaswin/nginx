@@ -85,8 +85,9 @@ ES_COUNT=0
 for packages in `echo $REQUIRED_PACKAGES`
 do
         echo "---------------------------------------------"
-        dpkg-query -s $packages
+        dpkg-query -s $packages > /dev/null
         EXIT_STATUS=$?
+	dpkg-query -W -f='${Status} ${Version}\n' $packages
         ES_COUNT=`expr $ES_COUNT + $EXIT_STATUS`
 done
 	if [ $ES_COUNT -gt 0 ]
@@ -180,7 +181,7 @@ echo "Please Provide the DB details"
 echo " "
 read -p "Enter mysql username [root]: " DB_USER
 echo " "
-read -p "Enter mysql password : " DB_PASSWORD
+read -s -p "Enter mysql password : " DB_PASSWORD
 echo " "
 read -p "Enter Database name [ examplecomdb ]: " DB_NAME
 echo " "
