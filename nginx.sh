@@ -148,8 +148,8 @@ then
 	exit 1
 fi
 ln -s /etc/nginx/sites-available/$DOMAIN_NAME /etc/nginx/sites-enabled/
-ln -s /var/log/nginx/example.com.access.log /var/www/example.com/logs/access.log
-ln -s /var/log/nginx/example.com.error.log /var/www/example.com/logs/error.log
+ln -s /var/log/nginx/$DOMAIN_NAME.access.log /var/www/$DOMAIN_NAME/logs/access.log
+ln -s /var/log/nginx/$DOMAIN_NAME.error.log /var/www/$DOMAIN_NAME/logs/error.log
 chown -R www-data:www-data /var/www/$DOMAIN_NAME/
 chown -R www-data:www-data /etc/nginx/sites-available
 echo " "
