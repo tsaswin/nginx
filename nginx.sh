@@ -12,7 +12,7 @@
 # Author        : Aswin Kumar TS
 # Revision      : 1.0
 # Creation      : Wednesday, April 02 2014
-# Modification  : 
+# Modification  : Thursday, April 03 2014
  
 #########################################################################################################################################
 # GLOBAL VARIABLE SECTION
@@ -30,13 +30,12 @@ CURRENT_USER=`whoami`
 package_check()
 {
 
-REQUIRED_PACKAGES='php5 nginx mysql'
-
-echo "---------------------------------------------"
+REQUIRED_PACKAGES='php5 php5-fpm nginx mysql-server'
 
 for packages in `echo $REQUIRED_PACKAGES`
 do
-	which $packages > /dev/null
+	echo "---------------------------------------------"
+	dpkg-query -W -f='${Status} ${Version}\n' $packages
 	EXIT_STATUS=$?
 	if [ $EXIT_STATUS -gt 0 ]
 		then
@@ -60,34 +59,44 @@ do
                                 		fi
 
 					fi
-				if [ $packages == php5 ]
-				then
-					apt-get install php5 php5-mysql php5-fpm
-					EXIT_STATUS=$?
-				elif [ $packages == mysql ]
-				then
-					apt-get install mysql-server php5-mysql
-					EXIT_STATUS=$?
-				else
 					apt-get install $packages
 					EXIT_STATUS=$?
-				fi
-
-				if [ $EXIT_STATUS -gt 0 ]
-				then
-					echo "Error while installing $packages,Please check network/repositories,Try the script again"
-					exit 1
-				fi
+					if [ $EXIT_STATUS -gt 0 ]
+					then
+						echo "Error while installing $packages,Please check network/repositories,Try the script again"
+						exit 1
+					fi
 			else
 				echo "$packages Installation in cancelled,You can install it manually"
 			fi
 		else
-			 echo "OK - $packages is Available in your system"
+			 echo "---------------------------------------------"
+			 echo "$package STATUS - OK"
 	fi
 			 
 done
 
 }
+
+verify_installed_package()
+{
+
+ES_COUNT=0
+for packages in `echo $REQUIRED_PACKAGES`
+do
+        echo "---------------------------------------------"
+        dpkg-query -W -f='${Status} ${Version}\n' $packages
+        EXIT_STATUS=$?
+        ES_COUNT=`expr $ES_COUNT + $EXIT_STATUS`
+done
+	if [ $ES_COUNT -gt 0 ]
+	then
+		echo "Some of the Required packages are not installed,So Terminating the script..."
+		exit 1
+	fi
+
+}
+
 
 #########################################################################################################################################
 ## Function to update Host entry to /etc/hosts
@@ -97,8 +106,7 @@ host_entry()
 {
 echo " "
 echo "Applying Host entry.."
-sleep 2
-grep -w "$DOMAIN_NAME" /etc/hosts
+grep -x "$IP_ADDRESS    $DOMAIN_NAME" /etc/hosts
 EXIT_STATUS=$?
 if [ $EXIT_STATUS -gt 0 ]
 	then
@@ -141,28 +149,23 @@ nginx_conf()
 {
 if [ -d /etc/nginx/sites-available ]
 then
-sed 's/example.com/'$DOMAIN_NAME'/g' $NGINX_CONF > /etc/nginx/sites-available/$DOMAIN_NAME
-ES=$?
-if [ $ES -gt 0 ]
-then
-	echo "Error While copying $NGINX_CONF /etc/nginx/sites-available/$DOMAIN_NAME/."
-	exit 1
-fi
-ln -s /etc/nginx/sites-available/$DOMAIN_NAME /etc/nginx/sites-enabled/
-ln -s /var/log/nginx/$DOMAIN_NAME.access.log /var/www/$DOMAIN_NAME/logs/access.log
-ln -s /var/log/nginx/$DOMAIN_NAME.error.log /var/www/$DOMAIN_NAME/logs/error.log
-chown -R www-data:www-data /var/www/$DOMAIN_NAME/
-chown -R www-data:www-data /etc/nginx/sites-available
-echo " "
-nginx -t
-echo " "
-service nginx restart
-ES=$?
-if [ "$ES" -gt 0 ]
-then
+	sed 's/example.com/'$DOMAIN_NAME'/g' $NGINX_CONF > /etc/nginx/sites-available/$DOMAIN_NAME
+	ES=$?
+	if [ $ES -gt 0 ]
+		then
+		echo "Error While copying $NGINX_CONF /etc/nginx/sites-available/$DOMAIN_NAME/."
+		exit 1
+	fi
+	ln -s /etc/nginx/sites-available/$DOMAIN_NAME /etc/nginx/sites-enabled/
+	ln -s /var/log/nginx/$DOMAIN_NAME.access.log /var/www/$DOMAIN_NAME/logs/access.log
+	ln -s /var/log/nginx/$DOMAIN_NAME.error.log /var/www/$DOMAIN_NAME/logs/error.log
+	chown -R www-data:www-data /var/www/$DOMAIN_NAME/
+	chown -R www-data:www-data /etc/nginx/sites-available
 	echo " "
-	echo "Error While restarting nginx, Please try manually once!"
-fi
+	nginx -t && service nginx restart || echo "Unable to restart nginx,Please check the configurations"
+else
+	echo "Directory :/etc/nginx/sites-available is not available"
+	exit 1 
 fi
 }
 
@@ -191,7 +194,6 @@ echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "Nginx Installation/Configuration Started"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "Checking for the script owner..."
-sleep 2
 
 if [ "$CURRENT_USER" != "$SCRIPT_USER" ]
 	then
@@ -206,6 +208,7 @@ fi
 #########################################################################################################################################
 
 package_check
+verify_installed_package
 
 while [ "$VAR_C" != "Y" ]
 	do
