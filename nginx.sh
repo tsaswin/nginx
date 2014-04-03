@@ -131,6 +131,7 @@ cd /var/www/$DOMAIN_NAME/htdocs/
 wget http://wordpress.org/latest.tar.gz
 tar --strip-components=1 -xvf latest.tar.gz
 rm latest.tar.gz
+cd
 }
 
 #########################################################################################################################################
@@ -140,7 +141,7 @@ nginx_conf()
 {
 if [ -d /etc/nginx/sites-available ]
 then
-cp $NGINX_CONF /etc/nginx/sites-available/$DOMAIN_NAME
+sed 's/example.com/'$DOMAIN_NAME'/g' $NGINX_CONF > /etc/nginx/sites-available/$DOMAIN_NAME
 ES=$?
 if [ $ES -gt 0 ]
 then
