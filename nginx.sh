@@ -35,7 +35,7 @@ REQUIRED_PACKAGES='php5 php5-fpm nginx mysql-server'
 for packages in `echo $REQUIRED_PACKAGES`
 do
 	echo "---------------------------------------------"
-	dpkg-query -W -f='${Status} ${Version}\n' $packages
+	dpkg-query -s $packages > /dev/null
 	EXIT_STATUS=$?
 	if [ $EXIT_STATUS -gt 0 ]
 		then
@@ -85,7 +85,7 @@ ES_COUNT=0
 for packages in `echo $REQUIRED_PACKAGES`
 do
         echo "---------------------------------------------"
-        dpkg-query -W -f='${Status} ${Version}\n' $packages
+        dpkg-query -s $packages
         EXIT_STATUS=$?
         ES_COUNT=`expr $ES_COUNT + $EXIT_STATUS`
 done
