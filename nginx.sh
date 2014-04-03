@@ -1,9 +1,8 @@
 #!/bin/bash
 #########################################################################################################################################
 #
-# Usage :  < path/to/script.sh domain_name >
+# Usage :  < path/to/script.sh >
 # 	   eg: nginx.sh example.com
-# PREREQUISITES : update your domain name in example.conf
 #
 # Description: This script will check if PHP, Mysql & Nginx are installed. If not present, missing packages will be installed
 # 		1.The script will then ask user for domain name
@@ -17,8 +16,8 @@
 #########################################################################################################################################
 # GLOBAL VARIABLE SECTION
 #########################################################################################################################################
-
-NGINX_CONF=example.conf
+PWD=`pwd`
+NGINX_CONF=$PWD/example.conf
 SCRIPT_USER=root
 CURRENT_USER=`whoami`
 
@@ -71,7 +70,7 @@ do
 			fi
 		else
 			 echo "---------------------------------------------"
-			 echo "$package STATUS - OK"
+			 echo "$packages STATUS - OK"
 	fi
 			 
 done
@@ -87,12 +86,14 @@ do
         echo "---------------------------------------------"
         dpkg-query -s $packages > /dev/null
         EXIT_STATUS=$?
-	dpkg-query -W -f='${Status} ${Version}\n' $packages
+	echo $packages && dpkg-query -W -f='${Status} ${Version}\n' $packages
         ES_COUNT=`expr $ES_COUNT + $EXIT_STATUS`
 done
 	if [ $ES_COUNT -gt 0 ]
 	then
+		echo "---------------------------------------------"
 		echo "Some of the Required packages are not installed,So Terminating the script..."
+		echo "---------------------------------------------"
 		exit 1
 	fi
 
@@ -113,7 +114,7 @@ if [ $EXIT_STATUS -gt 0 ]
 	then
 		echo " "
 		echo -e "$IP_ADDRESS	$DOMAIN_NAME" >> /etc/hosts
-		grep -w "$DOMAIN_NAME" /etc/hosts
+		grep -x "$IP_ADDRESS    $DOMAIN_NAME" /etc/hosts
 		echo " "
 	else
 		echo " "
@@ -187,6 +188,10 @@ read -p "Enter Database name [ examplecomdb ]: " DB_NAME
 echo " "
 mysql -u $DB_USER -p$DB_PASSWORD -e 'create database '$DB_NAME''
 DB_ES=$?
+if [ $DB_ES -gt 0 ]
+	then
+		echo "Error: While creating database $DB_NAME"
+fi
 }
 
 #########################################################################################################################################
