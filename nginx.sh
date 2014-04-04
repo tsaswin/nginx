@@ -31,6 +31,22 @@ package_check()
 
 REQUIRED_PACKAGES='php5 php5-fpm nginx mysql-server'
 
+read -p "Do you want to update repositories before installing - $packages [Y/n]: " VAR_B
+if [ $VAR_B == "Y" ]
+then
+	echo " "
+        echo "Executing apt-get update"
+        apt-get update
+        EXIT_STATUS=$?
+        if [ $EXIT_STATUS -gt 0 ]
+        then
+        	echo " "
+                echo "Error while udpating repositories,Please check network/repositories"
+                exit 1
+	fi
+fi
+
+
 for packages in `echo $REQUIRED_PACKAGES`
 do
 	echo "---------------------------------------------"
@@ -39,34 +55,13 @@ do
 	if [ $EXIT_STATUS -gt 0 ]
 		then
 			echo " "
-			read -p "Are you sure want to Install $packages [Y/n]: " VAR_A
-			if [ $VAR_A == "Y" ]
+			echo "Installing the Missing package:$packages"
+			apt-get install $packages
+			EXIT_STATUS=$?
+			if [ $EXIT_STATUS -gt 0 ]
 			then
-					echo " "
-					read -p "Do you want to update repositories [Y/n]: " VAR_B
-					if [ $VAR_B == "Y" ]
-					then
-						echo " "
-						echo "Executing apt-get update"
-						apt-get update
-		                                EXIT_STATUS=$?
-                		                if [ $EXIT_STATUS -gt 0 ]
-                                		then
-							echo " "
-                                        		echo "Error while udpating repositories,Please check network/repositories"
-							exit 1
-                                		fi
-
-					fi
-					apt-get install $packages
-					EXIT_STATUS=$?
-					if [ $EXIT_STATUS -gt 0 ]
-					then
-						echo "Error while installing $packages,Please check network/repositories,Try the script again"
-						exit 1
-					fi
-			else
-				echo "$packages Installation in cancelled,You can install it manually"
+				echo "Error while installing $packages,Please check network/repositories,Try the script again"
+				exit 1
 			fi
 		else
 			 echo "---------------------------------------------"
@@ -215,19 +210,19 @@ fi
 
 package_check
 verify_installed_package
-
-while [ "$VAR_C" != "Y" ]
+VAR_C=0
+while [ "$VAR_C" != "" ]
 	do
 		echo " "
 		read -p "Enter a domain name that you want to configure: " DOMAIN_NAME
 		echo " "
-		read -p "Are you sure want to go with $DOMAIN_NAME [Y/n]: " VAR_C
+		read -p "Press [Enter] Key to go with $DOMAIN_NAME,Type [N] to cancel: " VAR_C
 		echo " "
 	done
 	IP_ADDRESS=`/sbin/ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -n1`
-	read -p "Please verify your IP ADDRESS, "$IP_ADDRESS" [Y/n]: " VAR_D
+	read -p "Press [Enter] Key to go with "$IP_ADDRESS",Type [N] to cancel: " VAR_D
 	echo " "
-	if [ "$VAR_D" = "n" ]
+	if [ "$VAR_D" = "N" ]
 		then
 			read -p "Enter your IP ADDRESS manually: " IP_ADDRESS
 			host_entry
