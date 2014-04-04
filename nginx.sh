@@ -2,16 +2,16 @@
 #########################################################################################################################################
 #
 # Usage :  < path/to/script.sh >
-# 	   eg: nginx.sh example.com
+# 	   eg: nginx.sh
 #
 # Description: This script will check if PHP, Mysql & Nginx are installed. If not present, missing packages will be installed
 # 		1.The script will then ask user for domain name
 #		2.It will configure it with a wordpress plugin
 #
 # Author        : Aswin Kumar TS
-# Revision      : 1.0
+# Revision      : 2.0
 # Creation      : Wednesday, April 02 2014
-# Modification  : Thursday, April 03 2014
+# Modification  : Friday, April 04 2014
  
 #########################################################################################################################################
 # GLOBAL VARIABLE SECTION
