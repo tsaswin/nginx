@@ -103,13 +103,13 @@ host_entry()
 {
 echo " "
 echo "Applying Host entry.."
-grep -x "$IP_ADDRESS    $DOMAIN_NAME" /etc/hosts
+grep ""$DOMAIN_NAME"$" /etc/hosts
 EXIT_STATUS=$?
 if [ $EXIT_STATUS -gt 0 ]
 	then
 		echo " "
 		echo -e "$IP_ADDRESS	$DOMAIN_NAME" >> /etc/hosts
-		grep -x "$IP_ADDRESS    $DOMAIN_NAME" /etc/hosts
+		grep ""$DOMAIN_NAME"$" /etc/hosts
 		echo " "
 	else
 		echo " "
